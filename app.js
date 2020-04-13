@@ -27,3 +27,35 @@ function handleSignUp() {
     });
 
 }
+window.onload=function(){
+    initApp();
+}
+function initApp(){
+//ตรวจสอบและรับข้อมูลผู้ใช้
+firebase.auth().onAuthStateChanged(function(user) {
+    document.getElementById('quickstart-verify-email').disabled = true;
+    if (user) {
+        // User is signed in.
+        var displayName = user.displayName;
+        var email = user.email;
+        var emailVerified = user.emailVerified;
+        var photoURL = user.photoURL;
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+        var providerData = user.providerData;
+
+        document.getElementById('quickstart-signin-status').textContent = 'Signed in';
+        document.getElementById('quickstart-signin').textContent = 'Sign out';
+        document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null);
+        if(!emailVerified){
+            document.getElementById('quickstart-verify-email'.disabled) = false;
+        }
+    } else {
+        // No user is signed in.
+        document.getElementById('quickstart-signin-status').textContent = 'Signed out';
+        document.getElementById('quickstart-signin').textContent = 'Sign in';
+        document.getElementById('quickstart-account-details').textContent = 'null';
+    }
+    document.getElementById('quickstart-signin').disabled = false;
+    });     
+}
