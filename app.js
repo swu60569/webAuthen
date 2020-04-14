@@ -1,7 +1,7 @@
 function handleSignUp() {
     var email=document.getElementById('email').value;
     var password=document.getElementById('pwd').value;
-    var phone=document.getElementById('phone').value;
+    // var phone=document.getElementById('phone').value;
     if(email.length<4){
         alert("Email");
         return;
@@ -10,10 +10,10 @@ function handleSignUp() {
         alert("Password");
         return;
     }
-    if(phone.length<10){
-        alert("Phone");
-        return;
-    }
+    // if(phone.length<10){
+    //     alert("Phone");
+    //     return;
+    // }
     firebase.auth().createUserWithEmailAndPassword(email, password)
     .catch(function(error) {
     var errorCode = error.code;
@@ -25,11 +25,63 @@ function handleSignUp() {
     }
     console.log(error);
     });
-
 }
 window.onload=function(){
     initApp();
 }
+function toggleSignIn(){
+    //ลงทะเบียน
+    if (firebase.auth().currentUser){
+        firebase.auth().signOut();
+    }else {
+        //รอบ2
+        var email = document.getElementById('email').value;
+        var password=document.getElementById('pwd').value;
+        if (email.length < 4){
+            alert('Plese enter an email address.');
+            return;
+        }
+        if (password.length < 4){
+            alert('Plese enter a password.');
+            return;
+        }
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            if (errorCode === 'auth/wrong-password'){
+                alert('Wrong password.');
+            }else{
+                alert(errorMessage);
+            }
+            console.log(error);
+            document.getElementById('quickstart-signin').disabled = false;
+        });
+    }
+    document.getElementById('quickstart-signin').disabled = true;
+}
+function sendMail(){
+    firebase.auth().currentUser.sendEmailVerification().then(function(){
+        alert('Email Verification Sent.');
+    });
+}
+function resetPass(){
+    //ต้องมีการกรอก email
+    var email = document.getElementById('email').value;
+    firebase.auth().sendPasswordResetEmail(email).then(function(){
+        alert('Password Reset Sent.');
+    }).catch(function(error){
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        if (errorCode == 'auth/invalid-email'){
+            alert(errorMessage);
+        }else if (errorCode == 'auth/user-not-found'){
+            alert(errorMessage);
+        }
+        console.log(error);
+    });
+}
+
 function initApp(){
 //ตรวจสอบและรับข้อมูลผู้ใช้
 firebase.auth().onAuthStateChanged(function(user) {
