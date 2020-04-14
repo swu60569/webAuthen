@@ -45,6 +45,45 @@ function toggleSignIn(){
             alert('Plese enter a password.');
             return;
         }
+        firebase.auth().onAuthStateChanged(function(user) {
+            document.getElementById('quickstart-verify-email').disabled = false;
+            if (user) {
+                // User is signed in.
+                var user = firebase.auth().currentUser; 
+                if(user != null){
+                var fireBase_name = user.displayName;
+                var fireBase_email = user.email;
+                var fireBase_emailVerified = user.emailVerified;
+                var fireBase_photo = user.photoURL;
+                var fireBase_isAnonymous = user.isAnonymous;
+                var fireBase_uid = user.uid;
+                var fireBase_providerData = user.providerData;
+                var success = document.getElementById('quickstart-account-details');
+        
+                document.getElementById('quickstart-signin-status').textContent = 'Signed in';
+                document.getElementById('quickstart-signin').textContent = 'Sign out';
+                success.style.display = (success.style.display === "none" || success.style.display === "") ? "block" : "none";
+                success.innerHTML = "User Logged in with Credentials: <br />" +
+                "<b>Name:</b> " + fireBase_name + "<br />" + 
+                "<b>Email: </b>" + fireBase_email + "<br />" + 
+                "<b>emailVerified: </b>" + fireBase_emailVerified + "<br />" +
+                "<b>photo: </b>" + fireBase_photo + "<br />" +
+                "<b>isAnonymous: </b>" + fireBase_isAnonymous + "<br />" + 
+                "<b>uid: </b>" + fireBase_uid + "<br />" + 
+                "<b>Providerdata: </b>" + fireBase_providerData + "<br />";
+                }
+                if(!emailVerified){
+                    document.getElementById('quickstart-verify-email'.disabled) = false;
+                }
+            } else {
+                // No user is signed in.
+                document.getElementById('quickstart-signin-status').textContent = 'Signed out';
+                document.getElementById('quickstart-signin').textContent = 'Sign in';
+                document.getElementById('quickstart-account-details').textContent = 'null';
+            }
+            document.getElementById('quickstart-signin').disabled = false;
+        });      
+
         firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
             // Handle Errors here.
             var errorCode = error.code;
