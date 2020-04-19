@@ -1,5 +1,6 @@
 const state_enum = {
     NO_USER_LOGON: 'no_user_logon',
+    LOGIN_WITH_PHONE: 'login_with_phone',
     SIGN_UP: 'sign_up',
     USER_LOGON: 'user_logon',
 }
@@ -18,6 +19,13 @@ function initApp() {
         }
         render();
     });
+
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('submit', {
+        'size': 'invisible',
+        'callback': (response) => {}
+    });
+
+    window.recaptchaVerifier.render();
 }
 
 function signIn() {
@@ -37,7 +45,6 @@ function signIn() {
         .auth()
         .signInWithEmailAndPassword(email, password)
         .catch((error) => {
-            // Handle Errors here.
             var errorCode = error.code;
             var errorMessage = error.message;
             if (errorCode === "auth/wrong-password") {
@@ -49,11 +56,41 @@ function signIn() {
         });
 }
 
+function signInWithPhone() {
+    var phone = "+66" + document.getElementById("phone").value;
+    if (phone.length < 10) {
+        alert("Phone number incorrect.")
+        return;
+    }
+    let appVerifier = window.recaptchaVerifier;
+
+    firebase
+        .auth()
+        .signInWithPhoneNumber(phone, appVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            showVerification();
+        })
+        .catch((error) => {
+            console.log(error)
+        });
+}
+
+function comfirmOtp() {
+    let code = document.getElementById('otp').value;
+
+    let credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, code);
+    firebase
+        .auth()
+        .signInWithCredential(credential)
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
 function signUp() {
-    // var username = document.getElementById("username").value;
     var email = document.getElementById("email").value;
     var password = document.getElementById("password").value;
-    // var phone = document.getElementById("phone").value;
 
     if (email.length < 4) {
         alert("Email");
@@ -85,12 +122,24 @@ function logOut() {
     }
 }
 
-function submit() {
-    if (state == state_enum.SIGN_UP) {
-        signUp()
+function toggleSignInMethod() {
+    if (state == state_enum.NO_USER_LOGON) {
+        state = state_enum.LOGIN_WITH_PHONE;
+    } else {
+        state = state_enum.NO_USER_LOGON;
     }
+    render();
+}
+
+function submit() {
     if (state == state_enum.NO_USER_LOGON) {
         signIn();
+    }
+    if (state == state_enum.LOGIN_WITH_PHONE) {
+        signInWithPhone();
+    }
+    if (state == state_enum.SIGN_UP) {
+        signUp()
     }
     if (state == state_enum.USER_LOGON) {
         logOut();
@@ -99,11 +148,14 @@ function submit() {
 
 function render() {
     console.log(state);
-    if (state == state_enum.SIGN_UP) {
-        showSignUp();
-    }
     if (state == state_enum.NO_USER_LOGON) {
         showLogin();
+    }
+    if (state == state_enum.LOGIN_WITH_PHONE) {
+        showLoginWithPhone();
+    }
+    if (state == state_enum.SIGN_UP) {
+        showSignUp();
     }
     if (state == state_enum.USER_LOGON) {
         showUserDetail();
@@ -111,7 +163,7 @@ function render() {
 }
 
 function showSignUp() {
-    document.getElementById("container-header").textContent = "CREATE YOUR ACCOUNT";
+    document.getElementById("container-header").textContent = "Create your account";
     var login_form_element = document.getElementsByClassName("wrap-input100");
     for (i = 0; i < login_form_element.length; i++) {
         login_form_element.item(i).style.display = "flex";
@@ -121,23 +173,57 @@ function showSignUp() {
     document.getElementById("submit").textContent = "Create account";
     var user_detail_element = document.getElementsByClassName("user-detail").item(0);
     user_detail_element.style.display = "none";
+    document.getElementById("phone-sign-in").textContent = "";
     document.getElementById("create-account").textContent = "";
     document.getElementById("forgot-password").textContent = "";
 }
 
 function showLogin() {
-    document.getElementById("container-header").textContent = "ACCOUNT LOGIN";
+    document.getElementById("container-header").textContent = "Sign in with email";
     var login_form_element = document.getElementsByClassName("wrap-input100");
     for (i = 0; i < login_form_element.length; i++) {
         login_form_element.item(i).style.display = "flex";
     }
+    document.getElementsByClassName("wrap-input200").item(0).style.display = "none";
+    document.getElementsByClassName("wrap-input200").item(1).style.display = "none";
     document.getElementById("email").value = "";
     document.getElementById("password").value = "";
+    var user_detail_element = document.getElementsByClassName("user-detail").item(0);
+    user_detail_element.style.display = "none";
+    document.getElementById("submit").textContent = "Sign In";
+    document.getElementById("verification-btn").style.display = "none";
+    document.getElementById("phone-sign-in").textContent = "Sign in with phone number";
+    document.getElementById("create-account").textContent = "New here? create an account";
+    document.getElementById("forgot-password").textContent = "Forgot password?";
+}
+
+function showLoginWithPhone() {
+    document.getElementById("container-header").textContent = "Sign in with mobile phone";
+    var login_form_element = document.getElementsByClassName("wrap-input100");
+    for (i = 0; i < login_form_element.length; i++) {
+        login_form_element.item(i).style.display = "none";
+    }
+    document.getElementsByClassName("wrap-input200").item(0).style.display = "flex";
+    document.getElementsByClassName("wrap-input200").item(1).style.display = "none";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("phone").value = "";
     document.getElementById("submit").textContent = "Sign In";
     var user_detail_element = document.getElementsByClassName("user-detail").item(0);
     user_detail_element.style.display = "none";
-    document.getElementById("create-account").textContent = "New here? create an account";
-    document.getElementById("forgot-password").textContent = "Forgot password?";
+    document.getElementById("phone-sign-in").textContent = "Sign in with email and password";
+    document.getElementById("create-account").textContent = "";
+    document.getElementById("forgot-password").textContent = "";
+}
+
+function showVerification() {
+    document.getElementById("container-header").textContent = "Confirm verification code";
+
+    document.getElementsByClassName("wrap-input200").item(0).style.display = "none";
+    document.getElementsByClassName("wrap-input200").item(1).style.display = "flex";
+
+    document.getElementById("submit-btn").style.display = "none";
+    document.getElementById("verification-btn").style.display = "flex";
 }
 
 function showUserDetail() {
@@ -147,6 +233,8 @@ function showUserDetail() {
     for (i = 0; i < login_form_element.length; i++) {
         login_form_element.item(i).style.display = "none";
     }
+    document.getElementsByClassName("wrap-input200").item(0).style.display = "none";
+    document.getElementsByClassName("wrap-input200").item(1).style.display = "none";
     var fireBase_name = current_user.displayName;
     var fireBase_email = current_user.email;
     var fireBase_emailVerified = current_user.emailVerified;
@@ -172,7 +260,10 @@ function showUserDetail() {
         "<b>uid: </b>" +
         fireBase_uid
 
+    document.getElementById("submit-btn").style.display = "flex";
+    document.getElementById("verification-btn").style.display = "none";
     document.getElementById("submit").textContent = "Logout";
+    document.getElementById("phone-sign-in").textContent = "";
     document.getElementById("create-account").textContent = "";
     document.getElementById("forgot-password").textContent = "";
 }
