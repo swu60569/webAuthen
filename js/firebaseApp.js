@@ -20,7 +20,7 @@ function initApp() {
     });
 }
 
-function signIn() {
+async function signIn() {
     var email = document.getElementById("email").value;
     var password = document.getElementById("password").value;
 
@@ -33,7 +33,7 @@ function signIn() {
         return;
     }
 
-    firebase
+    let result = await firebase
         .auth()
         .signInWithEmailAndPassword(email, password)
         .catch((error) => {
@@ -47,9 +47,10 @@ function signIn() {
             }
             console.log(error);
         });
+    console.log(result);
 }
 
-async function signUp() {
+function signUp() {
     // var username = document.getElementById("username").value;
     var email = document.getElementById("email").value;
     var password = document.getElementById("password").value;
@@ -64,7 +65,7 @@ async function signUp() {
         return;
     }
 
-    let result = await firebase
+    firebase
         .auth()
         .createUserWithEmailAndPassword(email, password)
         .catch((error) => {
