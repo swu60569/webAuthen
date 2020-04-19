@@ -16,14 +16,16 @@
     <link rel="stylesheet" type="text/css" href="css/util.css" />
     <link rel="stylesheet" type="text/css" href="css/main.css" />
     <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+
     <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
-    <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-analytics.js"></script>
+
     <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-firestore.js"></script>
     <script src="js/firebaseConfig.js"></script>
     <script src="js/firebaseApp.js"></script>
 </head>
@@ -34,7 +36,7 @@
             <div class="wrap-login100 p-b-160 p-t-50">
                 <div class="login100-form validate-form">
                     <span class="login100-form-title p-b-43" id="container-header">
-                        Account Login
+                        Sign in with email
                     </span>
                     <div class="wrap-input100 rs1 validate-input" data-validate="Username is required">
                         <input class="input100" type="email" name="username" id="email" />
@@ -44,17 +46,35 @@
                         <input class="input100" type="password" name="pass" id="password" />
                         <span class="label-input100">Password</span>
                     </div>
-                    <div class="user-detail" style="display: none;">
+                    <div class="wrap-input200 rs3 validate-input" data-validate="Phone Number is required"
+                        style="display: none;">
+                        <input class="input100" type="tel" name="phone" id="phone" />
+                        <span class="label-input100">Phone Number</span>
                     </div>
-                    <div class="container-login100-form-btn">
+                    <div class="wrap-input200 rs3 validate-input" data-validate="Phone Number is required"
+                        style="display: none;">
+                        <input class="input100" type="number" name="otp" id="otp" />
+                        <span class="label-input100">Verification Code</span>
+                    </div>
+                    <div class="user-detail rs3" style="display: none;"></div>
+                    <div class="container-login100-form-btn" id="submit-btn">
                         <button class="login100-form-btn" onclick="submit()" id="submit">
                             Sign in
                         </button>
                     </div>
+                    <div class="container-login100-form-btn" id="verification-btn" style="display: none;">
+                        <button class="login100-form-btn" onclick="comfirmOtp()">
+                            Send
+                        </button>
+                    </div>
                     <div class="text-center w-full p-t-23">
-                        <a href="#" class="txt1" id="create-account"
-                            onclick="state = state_enum.SIGN_UP; render();">
+                        <a href="#" class="txt1" id="create-account" onclick="state = state_enum.SIGN_UP; render();">
                             New here? create an account
+                        </a>
+                    </div>
+                    <div class="text-center w-full p-t-23">
+                        <a href="#" class="txt1" id="phone-sign-in" onclick="toggleSignInMethod()">
+                            Sign in with phone number
                         </a>
                     </div>
                     <div class="text-center w-full p-t-23">
